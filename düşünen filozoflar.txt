@@ -11,9 +11,7 @@ void* filozof(void* num) {
     int id = *(int*)num; // Filozofun kimliği
     int solcatal = id; // Sol çatal indeksi
     int sagcatal = (id + 1) % filozof_sayisi; // Sağ çatal indeksi
-    //mod alma islemi 4.filozof(4,5) catallarını kullanır. 5.filozof(5,6)olmıyacagından 6mod5 1 olur masa cember seklınde cunku (5,1) şeklinde..
-//1.filozof yemek yerken 2.filozof yemek yıyemez cunku 1.filozofun sagındakı catal 2.filozofun sol catalı oldugu ıcın..
-//1.filozof(1,2)catalları kullanır. 2.filozof ise (2,3) catalları kullanmak ıstıyecek fakat dolu bekleyecek..
+
     while (1) {
         printf("Filozof %d dusunuyor...\n", id);
         sleep(1); // Düşünme süresi

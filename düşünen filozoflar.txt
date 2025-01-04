@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+#define filozof_sayisi 5
+
+sem_t catal[filozof_sayisi]; // Çatal semaforları
+
+void* filozof(void* num) {
+    int id = *(int*)num; // Filozofun kimliği
+    int solcatal = id; // Sol çatal indeksi
+    int sagcatal = (id + 1) % filozof_sayisi; // Sağ çatal indeksi
+    //mod alma islemi 4.filozof(4,5) catallarını kullanır. 5.filozof(5,6)olmıyacagından 6mod5 1 olur masa cember seklınde cunku (5,1) şeklinde..
+//1.filozof yemek yerken 2.filozof yemek yıyemez cunku 1.filozofun sagındakı catal 2.filozofun sol catalı oldugu ıcın..
+//1.filozof(1,2)catalları kullanır. 2.filozof ise (2,3) catalları kullanmak ıstıyecek fakat dolu bekleyecek..
+    while (1) {
+        printf("Filozof %d dusunuyor...\n", id);
+        sleep(1); // Düşünme süresi
+
+        printf("Filozof %d yemek yemek istiyor...\n", id);
+        sem_wait(&catal[solcatal]); // Sol çatalı al
+        sem_wait(&catal[sagcatal]); // Sağ çatalı al
+
+        printf("Filozof %d yemek yiyor...\n", id);
+        sleep(1); // Yeme süresi
+
+        sem_post(&catal[sagcatal]); // Sağ çatalı bırak
+        sem_post(&catal[solcatal]); // Sol çatalı bırak
+    }
+
+    return NULL;
+}
+
+int main() {
+    pthread_t filozoflar[filozof_sayisi]; // Filozoflar için thread'ler
+    int filozofid[filozof_sayisi]; // Filozof kimliklerini tutacak dizi
+
+    // Semaforları başlat
+    for (int i = 0; i < filozof_sayisi; i++) {
+        sem_init(&catal[i], 0, 1); // Her bir çatal için semaforu başlat
+    }
+
+    // Filozof threadlerini oluştur
+    for (int i = 0; i < filozof_sayisi; i++) {
+        filozofid[i] = i; // Her filozofa bir kimlik (ID) atıyoruz
+        pthread_create(&filozoflar[i], NULL, filozof, &filozofid[i]); // Filozof thread'ini başlat
+    }
+
+    // Filozof threadlerini bekle
+    for (int i = 0; i < filozof_sayisi; i++) {
+        pthread_join(filozoflar[i], NULL); // Her bir filozof thread'inin bitmesini bekle
+    }
+
+    // Semaforları yok et
+    for (int i = 0; i < filozof_sayisi; i++) {
+        sem_destroy(&catal[i]); // Kullanılan semaforları yok et
+    }
+
+    return 0; // Program başarıyla sonlandır
+}
